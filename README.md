@@ -1,0 +1,72 @@
+# Home Healthcare AWS Backup / Restore / DR Lab
+
+HIPAA-aligned backup, restore, and disaster recovery patterns for a home healthcare workload, implemented incrementally on AWS with Terraform.
+
+> **Lab disclaimer:** This repository uses **synthetic patient data only**. It demonstrates security and DR controls suitable for ePHI environments but is not a complete organizational business continuity program.
+
+## Architecture (target state)
+
+```text
+Phase 1: Synthetic data + schema + manifest (local)
+    │
+    ▼
+Phase 2: S3 + KMS + IAM + CloudTrail + Terraform state (us-east-1)
+    │
+    ▼
+Phase 3: AWS Backup plan → primary vault (east) → copy vault + Vault Lock (west)
+    │
+    ▼
+Phase 4: Restore to sandbox → EventBridge → Lambda verify vs manifest
+    │
+    ▼
+Phase 5: E2E DR simulation + HIPAA matrix + runbook + portfolio artifacts
+```
+
+## Regions
+
+| Role | Region |
+|------|--------|
+| Primary | `us-east-1` |
+| DR copy | `us-west-2` |
+
+## Phases
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| 0 | Complete | GitHub repo bootstrap |
+| 1 | Pending | Synthetic ePHI data pipeline |
+| 2 | Pending | Core S3 & KMS infrastructure (Terraform) |
+| 3 | Pending | Backup vault, Vault Lock & cross-region replication |
+| 4 | Pending | EventBridge + Lambda restore verification |
+| 5 | Pending | End-to-end audit & portfolio capture |
+
+See [docs/ROADMAP.md](docs/ROADMAP.md) for validation gates and deliverables per phase.
+
+## Repository structure
+
+```text
+home-healthcare-aws-backup-dr/
+├── .github/workflows/       # CI (Checkov, etc.) — added in later phases
+├── docs/
+│   ├── ROADMAP.md
+│   ├── evidence/            # Phase validation logs and CLI output
+│   └── runbooks/            # Operational procedures
+├── phase1-synthetic-data/   # Synthetic ePHI generator
+├── terraform/               # AWS infrastructure
+└── lambda/                  # Restore integrity verifier
+```
+
+## Prerequisites
+
+- Python 3.11+
+- Terraform 1.5+
+- AWS CLI v2 (configured profile)
+- GitHub CLI (`gh`) authenticated as `jrlyons13`
+
+## Getting started
+
+Phase 1 will add the synthetic data generator. AWS resources are not deployed until Phase 2.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

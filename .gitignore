@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.env.*
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!terraform.tfvars.example
+.terraform.lock.hcl
+crash.log
+override.tf
+override.tf.json
+
+# Generated synthetic data (regenerate locally)
+phase1-synthetic-data/output/
+*.generated.json
+
+# AWS / secrets
+*.pem
+*.key
+credentials
+.aws/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Evidence artifacts with sensitive account IDs (optional local only)
+docs/evidence/local/
