@@ -1,0 +1,31 @@
+{
+  "clinical": {
+    "care_plan_summary": "Monitor vital signs and medication compliance during home visits.",
+    "medications": [
+      {
+        "dosage": "10 mg daily",
+        "name": "Lisinopril"
+      }
+    ],
+    "primary_diagnosis_icd10": "I10"
+  },
+  "demographics": {
+    "date_of_birth": "1945-03-12",
+    "first_name": "Alex",
+    "last_name": "Synthetic1",
+    "mrn": "MRN-SYN-000001"
+  },
+  "metadata": {
+    "generated_at": "2026-09-07T02:00:00+00:00",
+    "generator_version": "1.0.0",
+    "synthetic_data_notice": "SYNTHETIC_EPHI_LAB_DATA_ONLY"
+  },
+  "patient_id": "SYN-000001",
+  "record_type": "home_health_visit",
+  "visit": {
+    "caregiver_npi": "9991234567",
+    "service_type": "skilled_nursing",
+    "visit_date": "2026-09-01",
+    "visit_duration_minutes": 60
+  }
+}

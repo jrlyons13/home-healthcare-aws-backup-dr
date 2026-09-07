@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/jrlyons13/home-healthcare-aws-backup-dr/patient_record.schema.json",
+  "title": "SyntheticHomeHealthPatientRecord",
+  "description": "Synthetic ePHI record for home healthcare backup/DR lab — not real patient data.",
+  "type": "object",
+  "required": [
+    "patient_id",
+    "record_type",
+    "demographics",
+    "visit",
+    "clinical",
+    "metadata"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "patient_id": {
+      "type": "string",
+      "pattern": "^SYN-[0-9]{6}$",
+      "description": "Synthetic patient identifier; always prefixed with SYN-"
+    },
+    "record_type": {
+      "type": "string",
+      "const": "home_health_visit"
+    },
+    "demographics": {
+      "type": "object",
+      "required": ["first_name", "last_name", "date_of_birth", "mrn"],
+      "additionalProperties": false,
+      "properties": {
+        "first_name": { "type": "string", "minLength": 1 },
+        "last_name": { "type": "string", "minLength": 1 },
+        "date_of_birth": {
+          "type": "string",
+          "format": "date"
+        },
+        "mrn": {
+          "type": "string",
+          "pattern": "^MRN-SYN-[0-9]{6}$"
+        }
+      }
+    },
+    "visit": {
+      "type": "object",
+      "required": ["visit_date", "caregiver_npi", "service_type", "visit_duration_minutes"],
+      "additionalProperties": false,
+      "properties": {
+        "visit_date": { "type": "string", "format": "date" },
+        "caregiver_npi": {
+          "type": "string",
+          "pattern": "^999[0-9]{7}$",
+          "description": "Synthetic NPI range starting with 999"
+        },
+        "service_type": {
+          "type": "string",
+          "enum": [
+            "skilled_nursing",
+            "physical_therapy",
+            "occupational_therapy",
+            "speech_therapy",
+            "home_health_aide"
+          ]
+        },
+        "visit_duration_minutes": {
+          "type": "integer",
+          "minimum": 30,
+          "maximum": 240
+        }
+      }
+    },
+    "clinical": {
+      "type": "object",
+      "required": ["primary_diagnosis_icd10", "care_plan_summary", "medications"],
+      "additionalProperties": false,
+      "properties": {
+        "primary_diagnosis_icd10": {
+          "type": "string",
+          "pattern": "^[A-Z][0-9]{2}(\\.[0-9]{1,4})?$"
+        },
+        "care_plan_summary": { "type": "string", "minLength": 10 },
+        "medications": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 10,
+          "items": {
+            "type": "object",
+            "required": ["name", "dosage"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string", "minLength": 1 },
+              "dosage": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["generated_at", "generator_version", "synthetic_data_notice"],
+      "additionalProperties": false,
+      "properties": {
+        "generated_at": { "type": "string", "format": "date-time" },
+        "generator_version": { "type": "string", "minLength": 1 },
+        "synthetic_data_notice": {
+          "type": "string",
+          "const": "SYNTHETIC_EPHI_LAB_DATA_ONLY"
+        }
+      }
+    }
+  }
+}

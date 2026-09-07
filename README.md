@@ -34,7 +34,7 @@ Phase 5: E2E DR simulation + HIPAA matrix + runbook + portfolio artifacts
 | Phase | Status | Description |
 |-------|--------|-------------|
 | 0 | Complete | GitHub repo bootstrap |
-| 1 | Pending | Synthetic ePHI data pipeline |
+| 1 | Complete | Synthetic ePHI data pipeline |
 | 2 | Pending | Core S3 & KMS infrastructure (Terraform) |
 | 3 | Pending | Backup vault, Vault Lock & cross-region replication |
 | 4 | Pending | EventBridge + Lambda restore verification |
@@ -65,7 +65,20 @@ home-healthcare-aws-backup-dr/
 
 ## Getting started
 
-Phase 1 will add the synthetic data generator. AWS resources are not deployed until Phase 2.
+### Phase 1 — Generate and validate synthetic data
+
+```powershell
+cd phase1-synthetic-data
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python generate_patients.py --count 10 --output ./output --seed 42
+python validate.py --output ./output
+```
+
+Browse sample records on GitHub under `phase1-synthetic-data/samples/`, or open generated files in `phase1-synthetic-data/output/patients/`.
+
+AWS resources are not deployed until Phase 2.
 
 ## License
 
