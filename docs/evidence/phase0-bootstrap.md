@@ -12,13 +12,13 @@
 
 ## GitHub remote
 
-<!-- Update after gh repo create succeeds -->
-
 | Item | Value |
 |------|-------|
 | Owner | `jrlyons13` |
 | Repository | `home-healthcare-aws-backup-dr` |
-| URL | _pending `gh auth login`_ |
+| URL | https://github.com/jrlyons13/home-healthcare-aws-backup-dr |
+| Visibility | Public |
+| Default branch | `main` (tracking `origin/main`) |
 
 ## Next step
 
