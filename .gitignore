@@ -14,6 +14,9 @@ venv/
 *.tfvars
 !terraform.tfvars.example
 .terraform.lock.hcl
+terraform/environments/**/backend.hcl
+terraform/bootstrap/terraform.tfstate*
+terraform/bootstrap/.terraform/
 crash.log
 override.tf
 override.tf.json

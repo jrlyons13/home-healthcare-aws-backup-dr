@@ -35,7 +35,7 @@ Phase 5: E2E DR simulation + HIPAA matrix + runbook + portfolio artifacts
 |-------|--------|-------------|
 | 0 | Complete | GitHub repo bootstrap |
 | 1 | Complete | Synthetic ePHI data pipeline |
-| 2 | Pending | Core S3 & KMS infrastructure (Terraform) |
+| 2 | Complete | Core S3 & KMS infrastructure (Terraform) |
 | 3 | Pending | Backup vault, Vault Lock & cross-region replication |
 | 4 | Pending | EventBridge + Lambda restore verification |
 | 5 | Pending | End-to-end audit & portfolio capture |
@@ -78,7 +78,15 @@ python validate.py --output ./output
 
 Browse sample records on GitHub under `phase1-synthetic-data/samples/`, or open generated files in `phase1-synthetic-data/output/patients/`.
 
-AWS resources are not deployed until Phase 2.
+### Phase 2 — Deploy encrypted S3 + KMS
+
+See [terraform/README.md](terraform/README.md) for bootstrap and apply steps.
+
+```powershell
+cd scripts
+.\phase2-upload.ps1 -BucketName "<ephi_bucket_name>"
+.\phase2-validate.ps1 -BucketName "<bucket>" -KmsKeyArn "<kms_key_arn>"
+```
 
 ## License
 
