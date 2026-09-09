@@ -36,7 +36,7 @@ Phase 5: E2E DR simulation + HIPAA matrix + runbook + portfolio artifacts
 | 0 | Complete | GitHub repo bootstrap |
 | 1 | Complete | Synthetic ePHI data pipeline |
 | 2 | Complete | Core S3 & KMS infrastructure (Terraform) |
-| 3 | Pending | Backup vault, Vault Lock & cross-region replication |
+| 3 | Complete | Backup vault, Vault Lock & cross-region replication |
 | 4 | Pending | EventBridge + Lambda restore verification |
 | 5 | Pending | End-to-end audit & portfolio capture |
 
@@ -86,6 +86,18 @@ See [terraform/README.md](terraform/README.md) for bootstrap and apply steps.
 cd scripts
 .\phase2-upload.ps1 -BucketName "<ephi_bucket_name>"
 .\phase2-validate.ps1 -BucketName "<bucket>" -KmsKeyArn "<kms_key_arn>"
+```
+
+### Phase 3 — Backup vaults + Vault Lock + cross-region copy
+
+```powershell
+cd terraform/environments/phase3
+terraform init "-backend-config=backend.hcl"
+terraform apply
+
+cd ..\..\..\scripts
+.\phase3-trigger-backup.ps1 -PrimaryVaultName "..." -CopyVaultArn "..." -BucketArn "..." -BackupRoleArn "..."
+.\phase3-validate.ps1 -PrimaryVaultName "home-healthcare-dr-primary" -CopyVaultName "home-healthcare-dr-copy"
 ```
 
 ## License

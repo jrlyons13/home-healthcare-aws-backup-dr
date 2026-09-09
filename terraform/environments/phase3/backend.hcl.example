@@ -1,0 +1,5 @@
+bucket         = "home-healthcare-dr-tfstate-ACCOUNT_ID"
+key            = "phase3/terraform.tfstate"
+region         = "us-east-1"
+dynamodb_table = "home-healthcare-dr-tflock"
+encrypt        = true

@@ -54,7 +54,21 @@ cd ..\..\..\scripts
 .\phase2-validate.ps1 -BucketName "<bucket>" -KmsKeyArn "<kms_key_arn from output>"
 ```
 
+## Phase 3 — Backup vaults, Vault Lock, cross-region copy
+
+```powershell
+cd terraform/environments/phase3
+copy backend.hcl.example backend.hcl   # set ACCOUNT_ID
+terraform init "-backend-config=backend.hcl"
+terraform apply
+
+cd ..\..\..\scripts
+.\phase3-trigger-backup.ps1 -PrimaryVaultName "..." -CopyVaultArn "..." -BucketArn "..." -BackupRoleArn "..."
+.\phase3-validate.ps1 -PrimaryVaultName "home-healthcare-dr-primary" -CopyVaultName "home-healthcare-dr-copy"
+```
+
+Deploy order inside Phase 3 Terraform: IAM role → KMS policies → vaults → backup plan.
+
 ## Future phases
 
-- **Phase 3:** AWS Backup vaults, Vault Lock, cross-region copy (new environment or extend phase2)
 - **Phase 4:** EventBridge + Lambda verifier
