@@ -13,7 +13,7 @@ venv/
 *.tfstate.*
 *.tfvars
 !terraform.tfvars.example
-.terraform.lock.hcl
+# Keep .terraform.lock.hcl committed for reproducible provider versions
 terraform/environments/**/backend.hcl
 terraform/bootstrap/terraform.tfstate*
 terraform/bootstrap/.terraform/
