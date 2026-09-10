@@ -69,6 +69,16 @@ cd ..\..\..\scripts
 
 Deploy order inside Phase 3 Terraform: IAM role → KMS policies → vaults → backup plan.
 
+## Phase 4 — Lambda restore verification
+
+```powershell
+cd scripts
+.\build-lambda.ps1
+cd ..\terraform\environments\phase4
+terraform init "-backend-config=backend.hcl"
+terraform apply
+```
+
 ## Future phases
 
-- **Phase 4:** EventBridge + Lambda verifier
+- **Phase 5:** End-to-end DR simulation and portfolio docs

@@ -16,7 +16,7 @@ Phase 2: S3 + KMS + IAM + CloudTrail + Terraform state (us-east-1)
 Phase 3: AWS Backup plan → primary vault (east) → copy vault + Vault Lock (west)
     │
     ▼
-Phase 4: Restore to sandbox → EventBridge → Lambda verify vs manifest
+Phase 4: Restore → EventBridge → Lambda verify vs manifest
     │
     ▼
 Phase 5: E2E DR simulation + HIPAA matrix + runbook + portfolio artifacts
@@ -37,7 +37,7 @@ Phase 5: E2E DR simulation + HIPAA matrix + runbook + portfolio artifacts
 | 1 | Complete | Synthetic ePHI data pipeline |
 | 2 | Complete | Core S3 & KMS infrastructure (Terraform) |
 | 3 | Complete | Backup vault, Vault Lock & cross-region replication |
-| 4 | Pending | EventBridge + Lambda restore verification |
+| 4 | Complete | EventBridge + Lambda restore verification |
 | 5 | Pending | End-to-end audit & portfolio capture |
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for validation gates and deliverables per phase.
@@ -98,6 +98,18 @@ terraform apply
 cd ..\..\..\scripts
 .\phase3-trigger-backup.ps1 -PrimaryVaultName "..." -CopyVaultArn "..." -BucketArn "..." -BackupRoleArn "..."
 .\phase3-validate.ps1 -PrimaryVaultName "home-healthcare-dr-primary" -CopyVaultName "home-healthcare-dr-copy"
+```
+
+### Phase 4 — Restore verification (Lambda + EventBridge)
+
+```powershell
+cd scripts
+.\build-lambda.ps1
+cd ..\terraform\environments\phase4
+terraform init "-backend-config=backend.hcl"
+terraform apply
+.\..\..\..\scripts\phase4-trigger-restore.ps1 -RecoveryPointArn "..." -DestinationBucketName "..." -BackupRoleArn "..."
+.\phase4-validate.ps1 -LogGroupName "/aws/lambda/home-healthcare-dr-verify-restore" -BucketName "..."
 ```
 
 ## License

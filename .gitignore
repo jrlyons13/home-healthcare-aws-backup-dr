@@ -1,4 +1,6 @@
 # Python
+lambda/build/
+lambda/dist/
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -40,3 +42,5 @@ Thumbs.db
 
 # Evidence artifacts with sensitive account IDs (optional local only)
 docs/evidence/local/
+event.json
+response.json
