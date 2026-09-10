@@ -113,11 +113,30 @@ Building and validating phase-by-phase ensures each security boundary is verifie
 - `docs/runbooks/DR-SIMULATION.md`
 - `docs/evidence/phase5-e2e-simulation.md`
 - Polished README with architecture diagram
-- Optional: GitHub release `v1.0.0-lab`
+- `scripts/phase5-e2e-simulation.ps1`
 
 **Validation:**
-- Simulated failure → restore → verify → audit trail documented
+- `E2E_DR_SIMULATION=PASS` (cross-phase health audit)
 - HIPAA safeguard mapping complete
+- Restore → verify path documented (Phases 3–4 evidence)
+
+**Status:** Complete
+
+---
+
+## Optional future phases (not started)
+
+### Phase 6: AWS Config HIPAA Conformance Pack
+
+- Deploy Config conformance pack (Operational Best Practices for HIPAA Security)
+- Continuous configuration compliance monitoring
+- Evidence integration for audit readiness
+
+### Phase 7: RTO/RPO Operational Monitoring
+
+- Custom Config rules (e.g. recovery point freshness vs RPO)
+- CloudWatch alarms on backup/restore/copy failures
+- Scheduled restore drill metrics
 
 ---
 

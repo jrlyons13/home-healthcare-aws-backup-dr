@@ -4,22 +4,39 @@ HIPAA-aligned backup, restore, and disaster recovery patterns for a home healthc
 
 > **Lab disclaimer:** This repository uses **synthetic patient data only**. It demonstrates security and DR controls suitable for ePHI environments but is not a complete organizational business continuity program.
 
-## Architecture (target state)
+[![GitHub](https://img.shields.io/badge/GitHub-jrlyons13%2Fhome--healthcare--aws--backup--dr-blue)](https://github.com/jrlyons13/home-healthcare-aws-backup-dr)
+
+## Architecture
 
 ```text
-Phase 1: Synthetic data + schema + manifest (local)
-    │
-    ▼
-Phase 2: S3 + KMS + IAM + CloudTrail + Terraform state (us-east-1)
-    │
-    ▼
-Phase 3: AWS Backup plan → primary vault (east) → copy vault + Vault Lock (west)
-    │
-    ▼
-Phase 4: Restore → EventBridge → Lambda verify vs manifest
-    │
-    ▼
-Phase 5: E2E DR simulation + HIPAA matrix + runbook + portfolio artifacts
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         us-east-1 (Primary)                             │
+│  ┌──────────────┐   SSE-KMS    ┌─────────────────────────────────────┐  │
+│  │ Phase 1      │─────────────►│ S3: home-healthcare-dr-ephi-*       │  │
+│  │ Synthetic    │   upload     │  patients/*.json  manifest.json     │  │
+│  │ ePHI + hash  │              └──────────────┬──────────────────────┘  │
+│  └──────────────┘                             │ AWS Backup              │
+│                                               ▼                         │
+│                              ┌────────────────────────────┐             │
+│                              │ Vault: home-healthcare-dr- │             │
+│                              │        primary             │             │
+│                              └─────────────┬──────────────┘             │
+│  CloudTrail ──► S3 data events           │ copy                        │
+│  EventBridge ◄── restore COMPLETED         │                             │
+│       │                                    │                             │
+│       ▼                                    │                             │
+│  Lambda: verify_restore                    │                             │
+│  (manifest hash + integrity)               │                             │
+└────────────────────────────────────────────┼─────────────────────────────┘
+                                             │
+                                             ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         us-west-2 (DR)                                  │
+│  ┌────────────────────────────┐                                         │
+│  │ Vault: home-healthcare-dr- │  Vault Lock (WORM / Compliance-style)  │
+│  │        copy                │  Recovery points immutable             │
+│  └────────────────────────────┘                                         │
+└─────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Regions
@@ -38,34 +55,41 @@ Phase 5: E2E DR simulation + HIPAA matrix + runbook + portfolio artifacts
 | 2 | Complete | Core S3 & KMS infrastructure (Terraform) |
 | 3 | Complete | Backup vault, Vault Lock & cross-region replication |
 | 4 | Complete | EventBridge + Lambda restore verification |
-| 5 | Pending | End-to-end audit & portfolio capture |
+| 5 | Complete | End-to-end audit & portfolio capture |
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) for validation gates and deliverables per phase.
+See [docs/ROADMAP.md](docs/ROADMAP.md) for validation gates per phase.
+
+## Key documentation
+
+| Document | Purpose |
+|----------|---------|
+| [HIPAA Control Matrix](docs/HIPAA-CONTROL-MATRIX.md) | §164.312 technical safeguards ↔ AWS controls |
+| [RTO / RPO](docs/RTO-RPO.md) | Recovery objectives and how the lab meets them |
+| [DR Simulation Runbook](docs/runbooks/DR-SIMULATION.md) | Step-by-step DR exercise |
+| [Backup & Replication](docs/runbooks/backup-and-replication.md) | On-demand backup and copy |
+| [Evidence](docs/evidence/) | Phase validation logs |
 
 ## Repository structure
 
 ```text
 home-healthcare-aws-backup-dr/
-├── .github/workflows/       # CI (Checkov, etc.) — added in later phases
-├── docs/
-│   ├── ROADMAP.md
-│   ├── evidence/            # Phase validation logs and CLI output
-│   └── runbooks/            # Operational procedures
-├── phase1-synthetic-data/   # Synthetic ePHI generator
-├── terraform/               # AWS infrastructure
-└── lambda/                  # Restore integrity verifier
+├── docs/                    # ROADMAP, HIPAA matrix, RTO/RPO, evidence
+├── phase1-synthetic-data/   # Generator + JSON Schema
+├── terraform/               # bootstrap, phase2–4 environments
+├── lambda/                    # verify_restore.py
+└── scripts/                 # Upload, backup, restore, validate, E2E
 ```
 
 ## Prerequisites
 
 - Python 3.11+
 - Terraform 1.5+
-- AWS CLI v2 (configured profile)
-- GitHub CLI (`gh`) authenticated as `jrlyons13`
+- AWS CLI v2
+- GitHub CLI (`gh`) for repo management
 
-## Getting started
+## Quick start (full lab)
 
-### Phase 1 — Generate and validate synthetic data
+### Phase 1 — Synthetic data
 
 ```powershell
 cd phase1-synthetic-data
@@ -76,41 +100,25 @@ python generate_patients.py --count 10 --output ./output --seed 42
 python validate.py --output ./output
 ```
 
-Browse sample records on GitHub under `phase1-synthetic-data/samples/`, or open generated files in `phase1-synthetic-data/output/patients/`.
+### Phase 2–4 — Infrastructure
 
-### Phase 2 — Deploy encrypted S3 + KMS
+See [terraform/README.md](terraform/README.md). Deploy bootstrap → phase2 → phase3 → phase4 in order.
 
-See [terraform/README.md](terraform/README.md) for bootstrap and apply steps.
-
-```powershell
-cd scripts
-.\phase2-upload.ps1 -BucketName "<ephi_bucket_name>"
-.\phase2-validate.ps1 -BucketName "<bucket>" -KmsKeyArn "<kms_key_arn>"
-```
-
-### Phase 3 — Backup vaults + Vault Lock + cross-region copy
-
-```powershell
-cd terraform/environments/phase3
-terraform init "-backend-config=backend.hcl"
-terraform apply
-
-cd ..\..\..\scripts
-.\phase3-trigger-backup.ps1 -PrimaryVaultName "..." -CopyVaultArn "..." -BucketArn "..." -BackupRoleArn "..."
-.\phase3-validate.ps1 -PrimaryVaultName "home-healthcare-dr-primary" -CopyVaultName "home-healthcare-dr-copy"
-```
-
-### Phase 4 — Restore verification (Lambda + EventBridge)
+### Phase 5 — E2E audit
 
 ```powershell
 cd scripts
-.\build-lambda.ps1
-cd ..\terraform\environments\phase4
-terraform init "-backend-config=backend.hcl"
-terraform apply
-.\..\..\..\scripts\phase4-trigger-restore.ps1 -RecoveryPointArn "..." -DestinationBucketName "..." -BackupRoleArn "..."
-.\phase4-validate.ps1 -LogGroupName "/aws/lambda/home-healthcare-dr-verify-restore" -BucketName "..."
+.\phase5-e2e-simulation.ps1
 ```
+
+Expected: `E2E_DR_SIMULATION=PASS`
+
+## Optional future phases
+
+| Phase | Focus |
+|-------|--------|
+| 6 | AWS Config HIPAA conformance pack |
+| 7 | Continuous RTO/RPO monitoring |
 
 ## License
 
