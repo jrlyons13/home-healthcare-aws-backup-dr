@@ -124,19 +124,45 @@ Building and validating phase-by-phase ensures each security boundary is verifie
 
 ---
 
+## Phase 6: AWS Config HIPAA Conformance Pack
+
+**Goal:** Continuous configuration compliance monitoring with the AWS-managed HIPAA Security conformance pack, without changing Phase 5 backup/restore evidence.
+
+**Deliverables:**
+- `terraform/environments/phase6/` — Config recorder, delivery bucket, HIPAA conformance pack
+- `scripts/phase6-validate.ps1`
+- `docs/evidence/phase6-validation.md`
+
+**Validation:**
+- Configuration recorder **recording** in `us-east-1`
+- Conformance pack state `CREATE_COMPLETE`
+- `CONFIG_PHASE6=PASS` (includes at least **2 COMPLIANT** Config rules on the Phase 2 ePHI bucket; more rules may appear as evaluations finish)
+
+**Note:** Account-wide pack scores will show many non-compliant rules in a lab; document summary in evidence.
+
+**Status:** Complete
+
+---
+
 ## Optional future phases (not started)
 
-### Phase 6: AWS Config HIPAA Conformance Pack
+### Phase 7: RPO Freshness Monitoring (minimal)
 
-- Deploy Config conformance pack (Operational Best Practices for HIPAA Security)
-- Continuous configuration compliance monitoring
-- Evidence integration for audit readiness
+**Goal:** Automated **26-hour RPO** checks on primary and DR copy vaults via custom AWS Config rules (6-hour schedule).
 
-### Phase 7: RTO/RPO Operational Monitoring
+**Deliverables:**
+- `lambda/rpo_freshness_config.py` + `scripts/build-lambda.ps1` zip
+- `terraform/environments/phase7/` — Lambda + two Config rules
+- `scripts/phase7-validate.ps1`
+- `docs/evidence/phase7-validation.md`
 
-- Custom Config rules (e.g. recovery point freshness vs RPO)
-- CloudWatch alarms on backup/restore/copy failures
-- Scheduled restore drill metrics
+**Validation:**
+- Both custom rules evaluate the ePHI bucket as **COMPLIANT** when recent recovery points exist
+- `PHASE7_RPO_MONITOR=PASS`
+
+**Prerequisites:** Phases 2–3 (backup), Phase 6 (Config recorder).
+
+**Status:** Complete
 
 ---
 
@@ -149,4 +175,6 @@ feat(phase2): deploy encrypted S3 bucket with KMS and CloudTrail
 feat(phase3): add cross-region backup vault with Vault Lock
 feat(phase4): add EventBridge-triggered restore verification Lambda
 docs(phase5): add E2E DR simulation evidence and HIPAA control matrix
+feat(phase6): add AWS Config recorder and HIPAA conformance pack
+feat(phase7): add custom Config RPO freshness rules for primary and DR vaults
 ```

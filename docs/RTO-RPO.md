@@ -40,6 +40,11 @@
 | Primary | `us-east-1` | `home-healthcare-dr-primary` |
 | DR copy | `us-west-2` | `home-healthcare-dr-copy` |
 
-## Future automation (Phase 7 — optional)
+## Phase 7 automation (RPO monitoring)
 
-Continuous RTO/RPO validation (custom Config rules, CloudWatch alarms on stale recovery points, scheduled restore drills) is planned as an optional extension — see `docs/ROADMAP.md`.
+Custom Config rules (26-hour max age, 6-hour evaluation) on:
+
+- `home-healthcare-dr-primary-rpo-freshness` (us-east-1)
+- `home-healthcare-dr-copy-rpo-freshness` (us-west-2)
+
+Validate with `scripts/phase7-validate.ps1` → `PHASE7_RPO_MONITOR=PASS`. RTO restore drills and CloudWatch alarms remain optional future work.

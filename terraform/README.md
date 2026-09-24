@@ -79,6 +79,42 @@ terraform init "-backend-config=backend.hcl"
 terraform apply
 ```
 
-## Future phases
+## Phase 6 — AWS Config + HIPAA conformance pack
 
-- **Phase 5:** End-to-end DR simulation and portfolio docs
+```powershell
+cd terraform/environments/phase6
+copy backend.hcl.example backend.hcl
+terraform init "-backend-config=backend.hcl"
+terraform apply
+```
+
+After apply, wait **10–20 minutes** for Config to evaluate resources, then:
+
+```powershell
+cd ..\..\..\scripts
+.\phase6-validate.ps1
+# Or: terraform -chdir=../environments/phase6 output -raw validate_command
+```
+
+**Prerequisite:** Phase 2 applied (remote state for ePHI bucket name). Only one Config recorder per region per account.
+
+## Phase 7 — RPO freshness Config rules
+
+```powershell
+cd scripts
+.\build-lambda.ps1
+cd ..\terraform\environments\phase7
+copy backend.hcl.example backend.hcl
+terraform init "-backend-config=backend.hcl"
+terraform apply
+```
+
+Trigger an on-demand evaluation, then validate:
+
+```powershell
+aws configservice start-config-rules-evaluation --region us-east-1 --config-rule-names home-healthcare-dr-primary-rpo-freshness home-healthcare-dr-copy-rpo-freshness
+cd ..\..\..\scripts
+.\phase7-validate.ps1
+```
+
+**Prerequisites:** Phases 2–3 (vaults + recovery points), Phase 6 (Config recorder).

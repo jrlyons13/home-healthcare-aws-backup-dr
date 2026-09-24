@@ -53,7 +53,7 @@
 
 - AWS BAA executed for production accounts holding real ePHI
 - MFA on privileged IAM users
-- AWS Config HIPAA conformance pack (optional Phase 6)
-- Continuous RTO/RPO monitoring (optional Phase 7)
+- AWS Config HIPAA conformance pack (Phase 6 — deploy + `CONFIG_PHASE6=PASS`)
+- RPO freshness monitoring via custom Config rules (Phase 7)
 - AWS Audit Manager assessment workflow
 - Network segmentation (VPC endpoints, PrivateLink) if applicable

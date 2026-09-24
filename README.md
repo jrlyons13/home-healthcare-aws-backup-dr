@@ -56,6 +56,8 @@ HIPAA-aligned backup, restore, and disaster recovery patterns for a home healthc
 | 3 | Complete | Backup vault, Vault Lock & cross-region replication |
 | 4 | Complete | EventBridge + Lambda restore verification |
 | 5 | Complete | End-to-end audit & portfolio capture |
+| 6 | Complete | AWS Config + HIPAA Security conformance pack |
+| 7 | Complete | Custom Config RPO freshness (primary + DR copy) |
 
 See [docs/ROADMAP.md](docs/ROADMAP.md) for validation gates per phase.
 
@@ -75,7 +77,7 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for validation gates per phase.
 home-healthcare-aws-backup-dr/
 ├── docs/                    # ROADMAP, HIPAA matrix, RTO/RPO, evidence
 ├── phase1-synthetic-data/   # Generator + JSON Schema
-├── terraform/               # bootstrap, phase2–4 environments
+├── terraform/               # bootstrap, phase2–7 environments
 ├── lambda/                    # verify_restore.py
 └── scripts/                 # Upload, backup, restore, validate, E2E
 ```
@@ -104,6 +106,39 @@ python validate.py --output ./output
 
 See [terraform/README.md](terraform/README.md). Deploy bootstrap → phase2 → phase3 → phase4 in order.
 
+### Phase 6 — AWS Config (HIPAA pack)
+
+```powershell
+cd terraform/environments/phase6
+copy backend.hcl.example backend.hcl
+terraform init "-backend-config=backend.hcl"
+terraform apply
+
+# After 10-20 minutes for evaluations:
+cd ..\..\..\scripts
+.\phase6-validate.ps1
+```
+
+Expected: `CONFIG_PHASE6=PASS`
+
+### Phase 7 — RPO freshness (Config custom rules)
+
+```powershell
+cd scripts
+.\build-lambda.ps1
+cd ..\terraform\environments\phase7
+copy backend.hcl.example backend.hcl
+terraform init "-backend-config=backend.hcl"
+terraform apply
+
+aws configservice start-config-rules-evaluation --region us-east-1 --config-rule-names home-healthcare-dr-primary-rpo-freshness home-healthcare-dr-copy-rpo-freshness
+Start-Sleep -Seconds 45
+cd ..\..\..\scripts
+.\phase7-validate.ps1
+```
+
+Expected: `PHASE7_RPO_MONITOR=PASS`
+
 ### Phase 5 — E2E audit
 
 ```powershell
@@ -112,13 +147,6 @@ cd scripts
 ```
 
 Expected: `E2E_DR_SIMULATION=PASS`
-
-## Optional future phases
-
-| Phase | Focus |
-|-------|--------|
-| 6 | AWS Config HIPAA conformance pack |
-| 7 | Continuous RTO/RPO monitoring |
 
 ## License
 

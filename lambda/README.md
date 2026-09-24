@@ -1,15 +1,21 @@
-# Lambda: Restore Integrity Verifier
+# Lambda functions
 
-`verify_restore.py` runs when EventBridge detects an AWS Backup **S3 restore job completed**. It validates objects under `restore-sandbox/` against the baseline `manifest.json` at the bucket root (JSON Schema + MD5/SHA-256).
+## `verify_restore.py` (Phase 4)
 
-## Build package (before Terraform apply)
+Runs when EventBridge detects an AWS Backup **S3 restore job completed**. Validates restored objects against `manifest.json` (MD5/SHA-256).
+
+## `rpo_freshness_config.py` (Phase 7)
+
+AWS Config **custom rule** evaluator: latest **COMPLETED** S3 recovery point in a vault must be within **26 hours** (RPO monitoring).
+
+## Build packages (before Terraform apply)
 
 ```powershell
 cd scripts
 .\build-lambda.ps1
 ```
 
-Output: `lambda/dist/verify_restore.zip`
+Output: `lambda/dist/verify_restore.zip`, `lambda/dist/rpo_freshness_config.zip`
 
 ## Environment variables (set by Terraform)
 
